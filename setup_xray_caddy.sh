@@ -563,21 +563,6 @@ setup() {
         print_color "green" "Caddy已被授予绑定特权端口的权限，可以使用80和443端口。"
     fi
     
-    # Cloudflare配置提醒
-    print_color "blue" "=== Cloudflare配置提醒 ==="
-    print_color "yellow" "请确保在Cloudflare控制台中完成以下配置："
-    print_color "yellow" "1. DNS解析设置"
-    print_color "yellow" "   - 添加A记录: $HOST_NAME -> $EXTERNAL_IP"
-    print_color "yellow" "   - 确保开启Proxy状态（云朵图标为橙色）"
-    print_color "yellow" "2. 创建规则"
-    print_color "yellow" "   - 登录Cloudflare控制台 (https://dash.cloudflare.com)"
-    print_color "yellow" "   - 选择您的域名: $HOST_NAME"
-    print_color "yellow" "   - 导航到 'Rules' > 'Overview' > 'Create rule' > 'Origin Rule'"
-    print_color "yellow" "   - 创建新规则:"
-    print_color "yellow" "     * Name: Change Port [443-$PORT_START]"
-    print_color "yellow" "     * Match against: URI Full wildcard https://$HOST_NAME/*"
-    print_color "yellow" "     * Action: Rewrite port to $PORT_START"
-    print_color "yellow" "     * 确保规则处于Active状态"
 }
 
 # 主菜单
