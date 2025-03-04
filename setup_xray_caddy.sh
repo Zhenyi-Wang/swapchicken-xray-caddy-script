@@ -499,7 +499,7 @@ PORT_START=$PORT_START
 PORT_END=$PORT_END
 UUID=$UUID
 XRAY_PORT=$XRAY_PORT
-INSTALL_DATE=$(date +"%Y-%m-%d %H:%M:%S")
+INSTALL_DATE="$(date +"%Y-%m-%d %H:%M:%S")"
 CERT_TYPE=$CERT_TYPE
 EOF
     if [ "$CERT_TYPE" = "cloudflare-origin" ]; then
