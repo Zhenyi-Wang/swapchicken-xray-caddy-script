@@ -4,7 +4,7 @@
 SCRIPT_URL="https://raw.githubusercontent.com/Zhenyi-Wang/swapchicken-xray-caddy-script/main/setup_xray_caddy.sh"
 
 # 配置文件存储设置
-CONFIG_FILE="/etc/xray/config.ini"
+CONFIG_FILE="/etc/xray-script/config.ini"
 XRAY_CONFIG_DIR="/usr/local/etc/xray"
 CADDY_CONFIG_FILE="/etc/caddy/Caddyfile"
 
