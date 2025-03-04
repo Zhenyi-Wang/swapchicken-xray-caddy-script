@@ -132,16 +132,26 @@ calculate_port_range() {
 
 # 从用户获取主机配置
 get_host_config() {
-    print_color "blue" "请输入您的主机/域名（用户将负责将443端口转发到Caddy）:"
+    print_color "yellow" "请先在Cloudflare中添加DNS记录："
+    print_color "yellow" "1. 登录Cloudflare控制面板"
+    print_color "yellow" "2. 选择您的域名"
+    print_color "yellow" "3. 点击'添加记录'"
+    print_color "yellow" "4. 类型选择'A'"
+    print_color "yellow" "5. 名称填写您要使用的子域名"
+    print_color "yellow" "6. IPv4地址填写: $EXTERNAL_IP"
+    print_color "yellow" "7. 代理状态选择'已代理'"
+    echo ""
+    
+    print_color "blue" "请输入您刚才在Cloudflare设置的完整域名:"
     read HOST_NAME
     
     if [ -z "$HOST_NAME" ]; then
-        print_color "red" "错误: 未提供主机名。必须提供主机/域名。"
+        print_color "red" "错误: 未提供域名。必须提供域名。"
         print_color "red" "退出安装..."
         exit 1
     fi
     
-    print_color "green" "使用主机: $HOST_NAME"
+    print_color "green" "使用域名: $HOST_NAME"
 }
 
 # 生成新的UUID
