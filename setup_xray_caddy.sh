@@ -654,7 +654,7 @@ view_config_and_status() {
         print_color "yellow" "   - 选择您的域名: $HOST_NAME"
         print_color "yellow" "   - 导航到 'Rules' > 'Overview' > 'Create rule' > 'Origin Rule'"
         print_color "yellow" "   - 创建新规则:"
-        print_color "yellow" "     * Name: Change Port [443-$PORT_START]"
+        print_color "yellow" "     * Name: Change Port [$HOST_NAME:443-$PORT_START]"
         print_color "yellow" "     * Match against: URI Full wildcard https://$HOST_NAME/*"
         print_color "yellow" "     * Action: Rewrite port to $PORT_START"
         print_color "yellow" "     * 确保规则处于Active状态"
