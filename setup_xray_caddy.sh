@@ -250,7 +250,7 @@ EOF
     
     # 授予Caddy绑定特权端口的权限
     print_color "blue" "授予Caddy绑定特权端口的权限..."
-    setcap 'cap_net_bind_service=+ep' /usr/sbin/caddy
+    setcap 'cap_net_bind_service=ep' /usr/sbin/caddy
     
     # 重启Caddy服务
     rc-service caddy restart
@@ -555,7 +555,7 @@ setup() {
     fi
     
     # 检查Caddy权限设置
-    if ! getcap /usr/sbin/caddy | grep -q "cap_net_bind_service+ep"; then
+    if ! getcap /usr/sbin/caddy | grep -q "cap_net_bind_service=ep"; then
         print_color "red" "警告: Caddy没有绑定特权端口的权限。"
         print_color "yellow" "如果Caddy服务无法启动，请在主菜单中选择'管理Caddy服务'，然后选择'重新授予Caddy绑定特权端口的权限'。"
     else
@@ -829,7 +829,7 @@ manage_caddy_service() {
             ;;
         6)
             print_color "blue" "重新授予Caddy绑定特权端口的权限..."
-            setcap 'cap_net_bind_service=+ep' /usr/sbin/caddy
+            setcap 'cap_net_bind_service=ep' /usr/sbin/caddy
             print_color "green" "权限已设置，Caddy现在应该可以绑定到80和443端口。"
             rc-service caddy restart
             print_color "green" "Caddy已重启以应用新权限。"
