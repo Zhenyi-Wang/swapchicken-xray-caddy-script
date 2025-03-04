@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# 脚本URL变量
+SCRIPT_URL="https://raw.githubusercontent.com/Zhenyi-Wang/swapchicken-xray-caddy-script/main/setup_xray_caddy.sh"
+
 # 配置文件存储设置
 CONFIG_FILE="/etc/xray/config.ini"
 XRAY_CONFIG_DIR="/usr/local/etc/xray"
@@ -881,94 +884,24 @@ uninstall() {
     fi
 }
 
-# 初始安装
-setup() {
-    check_root
-    install_common_packages
-    get_ip_addresses
-    calculate_port_range
-    get_host_config
-    
-    # 在安装Xray和配置Caddy之前设置证书
-    setup_certificate
-    
-    install_xray
-    configure_caddy
-    save_config
-    
-    print_color "green" "安装完成！"
-    view_config_and_status
-    
-    print_color "blue" "=== 重要提示 ==="
-    if [ "$CERT_TYPE" = "manual" ]; then
-        print_color "yellow" "您需要将TLS证书放置在以下位置:"
-        print_color "yellow" "证书路径: /etc/caddy/certificates/$HOST_NAME.pem"
-        print_color "yellow" "密钥路径: /etc/caddy/certificates/$HOST_NAME.key"
-        print_color "yellow" "或者您可以修改Caddy配置文件 $CADDY_CONFIG_FILE 以使用正确的证书路径。"
-    fi
-    
-    # 检查Caddy权限设置
-    if ! getcap /usr/sbin/caddy | grep -q "cap_net_bind_service+ep"; then
-        print_color "red" "警告: Caddy没有绑定特权端口的权限。"
-        print_color "yellow" "如果Caddy服务无法启动，请在主菜单中选择'管理Caddy服务'，然后选择'重新授予Caddy绑定特权端口的权限'。"
-    else
-        print_color "green" "Caddy已被授予绑定特权端口的权限，可以使用80和443端口。"
-    fi
-    
-    # Cloudflare规则创建提醒
-    print_color "blue" "=== Cloudflare配置提醒 ==="
-    print_color "yellow" "请确保在Cloudflare控制台中创建以下规则，以便443端口的流量能正确反代到Caddy的自定义端口($PORT_START):"
-    print_color "yellow" "1. 登录Cloudflare控制台 (https://dash.cloudflare.com)"
-    print_color "yellow" "2. 选择您的域名: $HOST_NAME"
-    print_color "yellow" "3. 导航到 'Rules' > 'Overview' > 'Create rule' > 'Origin Rule'"
-    print_color "yellow" "4. 创建新规则:"
-    print_color "yellow" "   - Name: Change Port [443-$PORT_START]"
-    print_color "yellow" "   - Match against: URI Full wildcard https://$HOST_NAME/*"
-    print_color "yellow" "   - Action: Rewrite port to $PORT_START"
-    print_color "yellow" "   - 确保规则处于Active状态"
-    print_color "yellow" "5. 部署规则"
-    print_color "yellow" "这将确保Cloudflare将HTTPS流量(443端口)正确转发到您服务器上的Caddy自定义端口($PORT_START)"
-}
-
-# 主菜单
-main_menu() {
-    while true; do
-        clear
-        print_color "blue" "=== Xray和Caddy管理面板 ==="
-        echo "1) 查看配置和服务状态"
-        echo "2) 更改配置"
-        echo "3) 管理Xray服务"
-        echo "4) 管理Caddy服务"
-        echo "5) 管理证书"
-        echo "6) 卸载"
-        echo "7) 退出"
-        
-        read -p "输入您的选择 [1-7]: " choice
-        
-        case $choice in
-            1) view_config_and_status; read -p "按Enter继续..." ;;
-            2) change_config; read -p "按Enter继续..." ;;
-            3) manage_xray_service; read -p "按Enter继续..." ;;
-            4) manage_caddy_service; read -p "按Enter继续..." ;;
-            5) manage_certificate; read -p "按Enter继续..." ;;
-            6) uninstall; read -p "按Enter继续..." ;;
-            7) exit 0 ;;
-            *) print_color "red" "无效选择。"; read -p "按Enter继续..." ;;
-        esac
-    done
-}
-
-# 创建v2ray管理命令
+# 将当前脚本内容保存到xray-manager
 create_management_command() {
+    # 首先将当前脚本内容保存到xray-manager
+    if [ -f "$0" ] && [ "$0" != "/dev/fd/*" ]; then
+        # 如果是本地文件
+        cp "$0" /usr/local/bin/xray-manager
+    else
+        # 如果是通过wget执行的
+        wget -qO /usr/local/bin/xray-manager "$SCRIPT_URL"
+    fi
+    chmod +x /usr/local/bin/xray-manager
+
+    # 创建v2ray命令
     cat > /usr/local/bin/v2ray << 'EOF'
 #!/bin/sh
 /bin/sh /usr/local/bin/xray-manager
 EOF
     chmod +x /usr/local/bin/v2ray
-    
-    # 将此脚本复制到永久位置
-    cp "$0" /usr/local/bin/xray-manager
-    chmod +x /usr/local/bin/xray-manager
     
     print_color "green" "管理命令'v2ray'已创建。"
     print_color "yellow" "由于您是通过远程下载方式运行脚本，需要重新连接终端或执行以下命令后才能使用v2ray命令："
