@@ -508,6 +508,8 @@ UUID=$UUID
 XRAY_PORT=$XRAY_PORT
 INSTALL_DATE="$(date +"%Y-%m-%d %H:%M:%S")"
 CERT_TYPE=$CERT_TYPE
+INSTALL_TYPE=$INSTALL_TYPE
+SCRIPT_URL="$SCRIPT_URL"
 EOF
     if [ "$CERT_TYPE" = "cloudflare-origin" ]; then
         echo "CF_EMAIL=$CF_EMAIL" >> $CONFIG_FILE
@@ -544,6 +546,9 @@ setup() {
     save_config
     
     print_color "green" "安装完成！"
+    create_management_command
+    print_color "green" "您现在可以使用'v2ray'命令来管理您的安装。"
+    
     view_config_and_status
     
     print_color "blue" "=== 重要提示 ==="
@@ -589,10 +594,11 @@ main_menu() {
         echo "3) 管理Xray服务"
         echo "4) 管理Caddy服务"
         echo "5) 管理证书"
-        echo "6) 卸载"
-        echo "7) 退出"
+        echo "6) 更新脚本"
+        echo "7) 卸载"
+        echo "8) 退出"
         
-        read -p "输入您的选择 [1-7]: " choice
+        read -p "输入您的选择 [1-8]: " choice
         
         case $choice in
             1) view_config_and_status; read -p "按Enter继续..." ;;
@@ -600,8 +606,9 @@ main_menu() {
             3) manage_xray_service; read -p "按Enter继续..." ;;
             4) manage_caddy_service; read -p "按Enter继续..." ;;
             5) manage_certificate; read -p "按Enter继续..." ;;
-            6) uninstall; read -p "按Enter继续..." ;;
-            7) exit 0 ;;
+            6) update_script; read -p "按Enter继续..." ;;
+            7) uninstall; read -p "按Enter继续..." ;;
+            8) exit 0 ;;
             *) print_color "red" "无效选择。"; read -p "按Enter继续..." ;;
         esac
     done
@@ -905,6 +912,20 @@ uninstall() {
     fi
 }
 
+# 更新脚本
+update_script() {
+    print_color "blue" "正在从 $SCRIPT_URL 更新脚本..."
+    if wget -q -O /usr/local/bin/xray-manager "$SCRIPT_URL"; then
+        chmod +x /usr/local/bin/xray-manager
+        print_color "green" "脚本更新成功！"
+        print_color "yellow" "请重新运行脚本以使用新版本。"
+        exit 0
+    else
+        print_color "red" "脚本更新失败。"
+        return 1
+    fi
+}
+
 # 将当前脚本内容保存到xray-manager
 create_management_command() {
     # 首先将当前脚本内容保存到xray-manager
@@ -938,6 +959,7 @@ if [ "$(basename $0)" = "xray-manager" ]; then
         main_menu
     else
         print_color "red" "未找到配置。运行初始安装..."
+        INSTALL_TYPE="local"  # 这里是通过管理命令运行的，所以是本地安装
         setup
         main_menu
     fi
@@ -953,16 +975,25 @@ else
     # 检查是否已安装
     if load_config; then
         print_color "yellow" "Xray和Caddy已经安装。"
-        print_color "yellow" "您想重新配置吗? (y/N)"
-    read confirm
-    
-        if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
-            setup
-    fi
+        print_color "blue" "请选择操作："
+        echo "1) 退出"
+        echo "2) 重新配置"
+        echo "3) 更新脚本"
+        read -p "您的选择 [1-3]: " choice
+        
+        case $choice in
+            2) setup ;;
+            3) update_script ;;
+            *) exit 0 ;;
+        esac
     else
-    setup
+        # 记录安装方式
+        if [ "$0" = "/dev/fd/*" ] || [ "$0" = "sh" ]; then
+            INSTALL_TYPE="remote"
+        else
+            INSTALL_TYPE="local"
+        fi
+        setup
+        main_menu
     fi
-    
-    create_management_command
-    print_color "green" "您现在可以使用'v2ray'命令来管理您的安装。"
 fi
