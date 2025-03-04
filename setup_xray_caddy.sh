@@ -985,7 +985,12 @@ else
         read -p "您的选择 [1-3]: " choice
         
         case $choice in
-            2) setup ;;
+            2) 
+                OLD_INSTALL_TYPE=$INSTALL_TYPE
+                setup
+                INSTALL_TYPE=$OLD_INSTALL_TYPE
+                save_config
+                ;;
             3) update_script ;;
             *) exit 0 ;;
         esac
