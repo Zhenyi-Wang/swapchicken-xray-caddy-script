@@ -80,13 +80,28 @@ install_common_packages() {
         exit 1
     fi
     
-    # 检查是否安装了timeout命令（用于后续可能的超时控制）
-    if ! command -v timeout &> /dev/null; then
-        print_color "blue" "安装coreutils（提供timeout命令）..."
-        apk add --no-cache coreutils
+    print_color "blue" "安装coreutils..."
+    timeout $TIMEOUT apk add --no-cache coreutils
+    if [ $? -ne 0 ]; then
+        print_color "red" "安装coreutils失败，请检查网络连接或系统资源。"
+        exit 1
     fi
     
-    print_color "green" "常用软件包已安装。"
+    print_color "blue" "安装socat..."
+    timeout $TIMEOUT apk add --no-cache socat
+    if [ $? -ne 0 ]; then
+        print_color "red" "安装socat失败，请检查网络连接或系统资源。"
+        exit 1
+    fi
+    
+    print_color "blue" "安装libcap..."
+    timeout $TIMEOUT apk add --no-cache libcap
+    if [ $? -ne 0 ]; then
+        print_color "red" "安装libcap失败，请检查网络连接或系统资源。"
+        exit 1
+    fi
+    
+    print_color "green" "所有软件包已安装完成。"
     
     # 清理APK缓存以释放空间
     apk cache clean
@@ -248,11 +263,6 @@ EOF
     # 设置Caddy文件权限
     chown caddy:caddy $CADDY_CONFIG_FILE
     chmod 644 $CADDY_CONFIG_FILE
-    
-    # 安装libcap并授予Caddy绑定特权端口的能力
-    print_color "blue" "授予Caddy绑定特权端口的权限..."
-    apk add --no-cache libcap
-    setcap 'cap_net_bind_service=+ep' /usr/sbin/caddy
     
     # 重启Caddy服务
     rc-service caddy restart
@@ -831,7 +841,6 @@ manage_caddy_service() {
             ;;
         6)
             print_color "blue" "重新授予Caddy绑定特权端口的权限..."
-            apk add --no-cache libcap
             setcap 'cap_net_bind_service=+ep' /usr/sbin/caddy
             print_color "green" "权限已设置，Caddy现在应该可以绑定到80和443端口。"
             rc-service caddy restart
