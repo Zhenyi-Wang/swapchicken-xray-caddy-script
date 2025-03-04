@@ -631,9 +631,7 @@ view_config_and_status() {
         elif [ "$CERT_TYPE" = "self-signed" ]; then
             print_color "yellow" "使用自签名证书，浏览器可能会显示不安全警告。"
         elif [ "$CERT_TYPE" = "cloudflare-origin" ]; then
-            print_color "yellow" "使用Cloudflare Origin证书，域名: $CF_DOMAIN"
-            print_color "yellow" "Cloudflare邮箱: $CF_EMAIL"
-            print_color "yellow" "Cloudflare API密钥: $CF_API_KEY"
+            print_color "yellow" "使用Cloudflare Origin证书，域名: $HOST_NAME"
         fi
         
         echo ""
