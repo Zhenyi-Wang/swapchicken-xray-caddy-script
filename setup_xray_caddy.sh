@@ -269,7 +269,7 @@ download_cf_origin_cert() {
     
     # 获取域名信息
     CF_DOMAIN=$(echo "$HOST_NAME" | awk -F. '{print $(NF-1)"."$NF}')
-    read -p "您的Cloudflare域名是 $CF_DOMAIN 吗？(y/n): " confirm
+    read -p "您的Cloudflare域名是 $CF_DOMAIN 吗？(y/N): " confirm
     if [ "$confirm" != "y" ]; then
         read -p "请输入正确的Cloudflare域名: " CF_DOMAIN
     fi
@@ -562,19 +562,21 @@ setup() {
         print_color "green" "Caddy已被授予绑定特权端口的权限，可以使用80和443端口。"
     fi
     
-    # Cloudflare规则创建提醒
+    # Cloudflare配置提醒
     print_color "blue" "=== Cloudflare配置提醒 ==="
-    print_color "yellow" "请确保在Cloudflare控制台中创建以下规则，以便443端口的流量能正确反代到Caddy的自定义端口($PORT_START):"
-    print_color "yellow" "1. 登录Cloudflare控制台 (https://dash.cloudflare.com)"
-    print_color "yellow" "2. 选择您的域名: $HOST_NAME"
-    print_color "yellow" "3. 导航到 'Rules' > 'Overview' > 'Create rule' > 'Origin Rule'"
-    print_color "yellow" "4. 创建新规则:"
-    print_color "yellow" "   - Name: Change Port [443-$PORT_START]"
-    print_color "yellow" "   - Match against: URI Full wildcard https://$HOST_NAME/*"
-    print_color "yellow" "   - Action: Rewrite port to $PORT_START"
-    print_color "yellow" "   - 确保规则处于Active状态"
-    print_color "yellow" "5. 部署规则"
-    print_color "yellow" "这将确保Cloudflare将HTTPS流量(443端口)正确转发到您服务器上的Caddy自定义端口($PORT_START)"
+    print_color "yellow" "请确保在Cloudflare控制台中完成以下配置："
+    print_color "yellow" "1. DNS解析设置"
+    print_color "yellow" "   - 添加A记录: $HOST_NAME -> $EXTERNAL_IP"
+    print_color "yellow" "   - 确保开启Proxy状态（云朵图标为橙色）"
+    print_color "yellow" "2. 创建规则"
+    print_color "yellow" "   - 登录Cloudflare控制台 (https://dash.cloudflare.com)"
+    print_color "yellow" "   - 选择您的域名: $HOST_NAME"
+    print_color "yellow" "   - 导航到 'Rules' > 'Overview' > 'Create rule' > 'Origin Rule'"
+    print_color "yellow" "   - 创建新规则:"
+    print_color "yellow" "     * Name: Change Port [443-$PORT_START]"
+    print_color "yellow" "     * Match against: URI Full wildcard https://$HOST_NAME/*"
+    print_color "yellow" "     * Action: Rewrite port to $PORT_START"
+    print_color "yellow" "     * 确保规则处于Active状态"
 }
 
 # 主菜单
@@ -653,6 +655,23 @@ view_config_and_status() {
         echo ""
         print_color "yellow" "Caddy服务状态:"
         rc-service caddy status | sed 's/^/  /'
+        
+        # Cloudflare配置提醒
+        echo ""
+        print_color "blue" "=== Cloudflare配置提醒 ==="
+        print_color "yellow" "请确保在Cloudflare控制台中完成以下配置："
+        print_color "yellow" "1. DNS解析设置"
+        print_color "yellow" "   - 添加A记录: $HOST_NAME -> $EXTERNAL_IP"
+        print_color "yellow" "   - 确保开启Proxy状态（云朵图标为橙色）"
+        print_color "yellow" "2. 创建规则"
+        print_color "yellow" "   - 登录Cloudflare控制台 (https://dash.cloudflare.com)"
+        print_color "yellow" "   - 选择您的域名: $HOST_NAME"
+        print_color "yellow" "   - 导航到 'Rules' > 'Overview' > 'Create rule' > 'Origin Rule'"
+        print_color "yellow" "   - 创建新规则:"
+        print_color "yellow" "     * Name: Change Port [443-$PORT_START]"
+        print_color "yellow" "     * Match against: URI Full wildcard https://$HOST_NAME/*"
+        print_color "yellow" "     * Action: Rewrite port to $PORT_START"
+        print_color "yellow" "     * 确保规则处于Active状态"
     else
         print_color "red" "未找到配置。请先运行安装。"
     fi
