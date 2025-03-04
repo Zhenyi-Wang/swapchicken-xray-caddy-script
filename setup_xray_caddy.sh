@@ -391,14 +391,7 @@ update_certificate() {
     if [ "$CERT_TYPE" = "self-signed" ]; then
         generate_self_signed_cert
     elif [ "$CERT_TYPE" = "cloudflare-origin" ]; then
-        # 使用已保存的Cloudflare信息更新证书
-        if [ -n "$CF_EMAIL" ] && [ -n "$CF_API_KEY" ] && [ -n "$CF_DOMAIN" ]; then
-            print_color "blue" "使用已保存的Cloudflare账户信息更新证书..."
-            download_cf_origin_cert
-        else
-            print_color "yellow" "未找到保存的Cloudflare账户信息，需要重新输入..."
-            download_cf_origin_cert
-        fi
+        download_cf_origin_cert
     else
         print_color "yellow" "您正在使用手动放置的证书，请手动更新。"
     fi
@@ -521,11 +514,6 @@ CERT_TYPE=$CERT_TYPE
 INSTALL_TYPE=$INSTALL_TYPE
 SCRIPT_URL="$SCRIPT_URL"
 EOF
-    if [ "$CERT_TYPE" = "cloudflare-origin" ]; then
-        echo "CF_EMAIL=$CF_EMAIL" >> $CONFIG_FILE
-        echo "CF_API_KEY=$CF_API_KEY" >> $CONFIG_FILE
-        echo "CF_DOMAIN=$CF_DOMAIN" >> $CONFIG_FILE
-    fi
     chmod 600 $CONFIG_FILE
     print_color "green" "配置已保存到 $CONFIG_FILE"
 }
@@ -533,11 +521,10 @@ EOF
 # 从文件加载配置
 load_config() {
     if [ -f "$CONFIG_FILE" ]; then
-        . $CONFIG_FILE
+        . "$CONFIG_FILE"
         return 0
-    else
-        return 1
     fi
+    return 1
 }
 
 # 初始安装
