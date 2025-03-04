@@ -58,41 +58,34 @@ install_common_packages() {
         fi
     done
 
-    # 定义安装包函数
-    install_package() {
-        local package=$1
-        local retry_count=0
-        
-        print_color "blue" "安装${package}..."
-        while [ $retry_count -lt $MAX_RETRIES ]; do
-            timeout $TIMEOUT apk add --no-cache $package
-            if [ $? -eq 0 ]; then
-                return 0
-            fi
-            retry_count=$((retry_count + 1))
-            if [ $retry_count -lt $MAX_RETRIES ]; then
-                print_color "yellow" "安装${package}失败，${RETRY_WAIT}秒后进行第${retry_count}次重试..."
-                sleep $RETRY_WAIT
-            else
-                print_color "red" "安装${package}失败。请尝试以下方法："
-                print_color "red" "1. 重新运行脚本"
-                print_color "red" "2. 手动运行: apk add --no-cache ${package}"
-                print_color "red" "3. 检查网络连接和系统资源"
-                exit 1
-            fi
-        done
-    }
-    
-    # 安装所需的包
+    # 定义要安装的包
     local PACKAGES="curl jq openssl caddy coreutils socat libcap"
-    for package in $PACKAGES; do
-        install_package $package
+    
+    # 一次性安装所有包
+    print_color "blue" "安装所需软件包: $PACKAGES"
+    retry_count=0
+    while [ $retry_count -lt $MAX_RETRIES ]; do
+        timeout $TIMEOUT apk add $PACKAGES
+        if [ $? -eq 0 ]; then
+            print_color "green" "所有软件包已安装完成。"
+            return 0
+        fi
+        retry_count=$((retry_count + 1))
+        if [ $retry_count -lt $MAX_RETRIES ]; then
+            print_color "yellow" "安装失败，${RETRY_WAIT}秒后进行第${retry_count}次重试..."
+            sleep $RETRY_WAIT
+        else
+            print_color "red" "安装失败。请尝试以下方法："
+            print_color "red" "1. 重新运行脚本"
+            print_color "red" "2. 手动安装: apk add $PACKAGES"
+            print_color "red" "3. 检查网络连接和系统资源"
+            print_color "red" "4. 尝试逐个安装包："
+            for package in $PACKAGES; do
+                print_color "red" "   apk add $package"
+            done
+            exit 1
+        fi
     done
-    
-    print_color "green" "所有软件包已安装完成。"
-    
-    # 清理APK缓存以释放空间
-    apk cache clean
 }
 
 # 获取IP地址
