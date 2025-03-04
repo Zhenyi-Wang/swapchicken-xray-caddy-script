@@ -959,7 +959,13 @@ if [ "$(basename $0)" = "xray-manager" ]; then
         main_menu
     else
         print_color "red" "未找到配置。运行初始安装..."
-        INSTALL_TYPE="local"  # 这里是通过管理命令运行的，所以是本地安装
+        # 通过 readlink 获取 xray-manager 的真实路径
+        REAL_PATH=$(readlink -f "$(command -v xray-manager)")
+        if [ -L "$REAL_PATH" ] && echo "$(readlink -f "$REAL_PATH")" | grep -q "^/dev/fd/"; then
+            INSTALL_TYPE="remote"
+        else
+            INSTALL_TYPE="local"
+        fi
         setup
         main_menu
     fi
