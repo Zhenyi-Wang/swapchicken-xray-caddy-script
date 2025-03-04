@@ -245,6 +245,10 @@ EOF
     chown caddy:caddy $CADDY_CONFIG_FILE
     chmod 644 $CADDY_CONFIG_FILE
     
+    # 授予Caddy绑定特权端口的权限
+    print_color "blue" "授予Caddy绑定特权端口的权限..."
+    setcap 'cap_net_bind_service=+ep' /usr/sbin/caddy
+    
     # 重启Caddy服务
     rc-service caddy restart
     
