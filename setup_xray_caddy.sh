@@ -35,71 +35,59 @@ check_root() {
 install_common_packages() {
     print_color "blue" "安装常用软件包..."
     
-    # 设置超时时间（秒）
+    # 设置超时时间（秒）和重试次数
     local TIMEOUT=300
+    local MAX_RETRIES=3
+    local RETRY_WAIT=5
     
     # 更新包索引，添加超时和错误处理
     print_color "blue" "更新包索引..."
-    timeout $TIMEOUT apk update
-    if [ $? -ne 0 ]; then
-        print_color "red" "更新包索引失败，尝试重新更新..."
-        sleep 2
-        apk update
-        if [ $? -ne 0 ]; then
-            print_color "red" "更新包索引失败，请检查网络连接或磁盘空间。"
+    local retry_count=0
+    while [ $retry_count -lt $MAX_RETRIES ]; do
+        timeout $TIMEOUT apk update
+        if [ $? -eq 0 ]; then
+            break
+        fi
+        retry_count=$((retry_count + 1))
+        if [ $retry_count -lt $MAX_RETRIES ]; then
+            print_color "yellow" "更新包索引失败，${RETRY_WAIT}秒后进行第${retry_count}次重试..."
+            sleep $RETRY_WAIT
+        else
+            print_color "red" "更新包索引失败，请检查网络连接或手动运行 'apk update'。"
             exit 1
         fi
-    fi
+    done
+
+    # 定义安装包函数
+    install_package() {
+        local package=$1
+        local retry_count=0
+        
+        print_color "blue" "安装${package}..."
+        while [ $retry_count -lt $MAX_RETRIES ]; do
+            timeout $TIMEOUT apk add --no-cache $package
+            if [ $? -eq 0 ]; then
+                return 0
+            fi
+            retry_count=$((retry_count + 1))
+            if [ $retry_count -lt $MAX_RETRIES ]; then
+                print_color "yellow" "安装${package}失败，${RETRY_WAIT}秒后进行第${retry_count}次重试..."
+                sleep $RETRY_WAIT
+            else
+                print_color "red" "安装${package}失败。请尝试以下方法："
+                print_color "red" "1. 重新运行脚本"
+                print_color "red" "2. 手动运行: apk add --no-cache ${package}"
+                print_color "red" "3. 检查网络连接和系统资源"
+                exit 1
+            fi
+        done
+    }
     
-    # 逐个安装包，避免一次性安装多个包导致内存不足
-    print_color "blue" "安装curl..."
-    timeout $TIMEOUT apk add --no-cache curl
-    if [ $? -ne 0 ]; then
-        print_color "red" "安装curl失败，请检查网络连接或系统资源。"
-        exit 1
-    fi
-    
-    print_color "blue" "安装jq..."
-    timeout $TIMEOUT apk add --no-cache jq
-    if [ $? -ne 0 ]; then
-        print_color "red" "安装jq失败，请检查网络连接或系统资源。"
-        exit 1
-    fi
-    
-    print_color "blue" "安装openssl..."
-    timeout $TIMEOUT apk add --no-cache openssl
-    if [ $? -ne 0 ]; then
-        print_color "red" "安装openssl失败，请检查网络连接或系统资源。"
-        exit 1
-    fi
-    
-    print_color "blue" "安装caddy..."
-    timeout $TIMEOUT apk add --no-cache caddy
-    if [ $? -ne 0 ]; then
-        print_color "red" "安装caddy失败，请检查网络连接或系统资源。"
-        exit 1
-    fi
-    
-    print_color "blue" "安装coreutils..."
-    timeout $TIMEOUT apk add --no-cache coreutils
-    if [ $? -ne 0 ]; then
-        print_color "red" "安装coreutils失败，请检查网络连接或系统资源。"
-        exit 1
-    fi
-    
-    print_color "blue" "安装socat..."
-    timeout $TIMEOUT apk add --no-cache socat
-    if [ $? -ne 0 ]; then
-        print_color "red" "安装socat失败，请检查网络连接或系统资源。"
-        exit 1
-    fi
-    
-    print_color "blue" "安装libcap..."
-    timeout $TIMEOUT apk add --no-cache libcap
-    if [ $? -ne 0 ]; then
-        print_color "red" "安装libcap失败，请检查网络连接或系统资源。"
-        exit 1
-    fi
+    # 安装所需的包
+    local PACKAGES="curl jq openssl caddy coreutils socat libcap"
+    for package in $PACKAGES; do
+        install_package $package
+    done
     
     print_color "green" "所有软件包已安装完成。"
     
