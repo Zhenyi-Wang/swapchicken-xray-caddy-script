@@ -879,8 +879,10 @@ uninstall() {
         rm -f /usr/local/bin/xray-manager
         
         print_color "green" "卸载完成。"
+        print_color "blue" "感谢使用！"
+        exit 0
     else
-        print_color "blue" "卸载已取消。"
+        print_color "yellow" "取消卸载。"
     fi
 }
 
