@@ -532,7 +532,6 @@ load_config() {
 
 # 初始安装
 setup() {
-    check_root
     install_common_packages
     get_ip_addresses
     calculate_port_range
@@ -953,6 +952,7 @@ EOF
 }
 
 # 检查是首次运行还是作为管理脚本被调用
+check_root
 if [ "$(basename $0)" = "xray-manager" ]; then
     # 作为管理脚本被调用
     if load_config; then
@@ -968,9 +968,6 @@ else
     clear
     print_color "blue" "=== Alpine Linux Xray和Caddy安装脚本 ==="
     print_color "blue" "此脚本将安装和配置Xray和Caddy。"
-    
-    # 检查是否为root用户
-    check_root
     
     # 检查是否已安装
     if load_config; then
