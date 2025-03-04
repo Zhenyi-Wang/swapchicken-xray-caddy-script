@@ -971,6 +971,10 @@ EOF
     chmod +x /usr/local/bin/xray-manager
     
     print_color "green" "管理命令'v2ray'已创建。"
+    print_color "yellow" "由于您是通过远程下载方式运行脚本，需要重新连接终端或执行以下命令后才能使用v2ray命令："
+    print_color "blue" "    source ~/.bashrc"
+    print_color "blue" "或者直接运行："
+    print_color "blue" "    /usr/local/bin/v2ray"
 }
 
 # 检查是首次运行还是作为管理脚本被调用
