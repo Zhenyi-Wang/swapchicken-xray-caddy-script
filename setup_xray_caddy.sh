@@ -977,7 +977,6 @@ if [ "$(basename $0)" = "xray-manager" ]; then
             INSTALL_TYPE="local"
         fi
         setup
-        main_menu
     fi
 else
     # 首次运行
@@ -1014,6 +1013,5 @@ else
             INSTALL_TYPE="local"
         fi
         setup
-        main_menu
     fi
 fi
