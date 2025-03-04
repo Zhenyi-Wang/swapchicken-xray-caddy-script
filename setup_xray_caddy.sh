@@ -988,9 +988,11 @@ else
         esac
     else
         # 记录安装方式
-        if [ "$0" = "/dev/fd/*" ] || [ "$0" = "sh" ]; then
+        if echo "$0" | grep -q "^/dev/fd/"; then
+            # 通过 sh <(wget -qO- url) 方式运行
             INSTALL_TYPE="remote"
         else
+            # 下载脚本后执行
             INSTALL_TYPE="local"
         fi
         setup
