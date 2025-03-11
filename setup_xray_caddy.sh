@@ -649,6 +649,7 @@ view_config_and_status() {
         print_color "yellow" "1. DNS解析设置"
         print_color "yellow" "   - 添加A记录: $HOST_NAME -> $EXTERNAL_IP"
         print_color "yellow" "   - 确保开启Proxy状态（云朵图标为橙色）"
+        echo ""
         print_color "yellow" "2. 创建规则"
         print_color "yellow" "   - 登录Cloudflare控制台 (https://dash.cloudflare.com)"
         print_color "yellow" "   - 选择您的域名: $HOST_NAME"
@@ -658,6 +659,10 @@ view_config_and_status() {
         print_color "yellow" "     * Match against: URI Full wildcard https://$HOST_NAME/*"
         print_color "yellow" "     * Action: Rewrite port to $PORT_START"
         print_color "yellow" "     * 确保规则处于Active状态"
+        print_color "yellow" "3. SSL/TLS设置"
+        print_color "yellow" "   - 在域名控制台中，选择SSL/TLS - Overview"
+        print_color "yellow" "   - 将模式设为Full (strict)"
+        echo ""
     else
         print_color "red" "未找到配置。请先运行安装。"
     fi
