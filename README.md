@@ -1,3 +1,6 @@
+# 注意：需要先手动安装xray-core
+由于xray-core官方的变化，目前脚本无法成功安装xray，请先按照官方说明手动安装并启动：https://github.com/XTLS/Xray-install/blob/main/alpinelinux/README_zh-Hans.md
+
 # Xray 与 Caddy 自动安装配置脚本
 
 > ⚠️ 重要说明：
